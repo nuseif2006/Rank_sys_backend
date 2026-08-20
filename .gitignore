@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.apk
+*.ipa
+
+# Environment & Credentials
+.env
+.env.local
+*.pem
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
