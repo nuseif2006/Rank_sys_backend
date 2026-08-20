@@ -9,8 +9,7 @@ db.exec(`
     fname TEXT NOT NULL,
     lname TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    pass TEXT NOT NULL,
-    token TEXT NOT NULL
+    pass TEXT NOT NULL
   )
 `);
 
