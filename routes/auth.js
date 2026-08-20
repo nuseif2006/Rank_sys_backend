@@ -1,14 +1,13 @@
 const express = require("express")
 const router = express.Router()
 const db = require("../db")
-const jwt = require("jsonwebtoken")
 
 router.post("/register", (req, res) => {
     const {fname, lname, email, pass} = req.body
     if (fname == "" || lname == "" || email == "" || pass == "") return res.status(400).json({msg: "Error occured"})
     try{
-        const insert = db.prepare("insert into users (fname, lname, email, pass) values(?,?,?,?)")
-        insert.run(fname, lname, email, pass)
+        // const insert = db.prepare("insert into users (fname, lname, email, pass) values(?,?,?,?)")
+        // insert.run(fname, lname, email, pass)
         res.status(201).json({msg: `Account created, check your inbox`})
     }
     catch{
