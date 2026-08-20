@@ -40,7 +40,10 @@ router.post("/login", async (req, res)=> {
     try{
         const Data = await signInWithEmailAndPassword(auth, email, pass)
         await Data.user.reload()
-        if (!Data.user.emailVerified) return res.status(404).json({msg: "Verify Account email link"})
+        if (!Data.user.emailVerified) {
+            await sendEmailVerification(Data.user)
+            return res.status(404).json({msg: "Verify Account email link"})
+        }
         const select = db.prepare("select * from users where email = ? and pass = ?")
         const user = select.get(email, pass)
         if (!user) return res.status(400).json({msg: "Something went wrong"})

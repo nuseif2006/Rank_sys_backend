@@ -14,10 +14,4 @@ db.exec(`
   )
 `);
 
-db.exec(`
-  create table if not exists blacklists(
-    id integer primary key autoincrement,
-    token text unique not null
-  )`)
-
 module.exports = db;

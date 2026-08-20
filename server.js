@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const authRoutes = require("./routes/auth")
+const taskRoutes = require("./routes/task")
 
 const app = express()
 const port = 5000
@@ -12,6 +13,7 @@ app.use(cors({
 }))
 
 app.use("/auth", authRoutes)
+app.use("/tasks", taskRoutes)
 
 app.get("/",(req, res) => {
     res.send("Healthy")
