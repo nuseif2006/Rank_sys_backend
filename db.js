@@ -9,8 +9,15 @@ db.exec(`
     fname TEXT NOT NULL,
     lname TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    pass TEXT NOT NULL
+    pass TEXT NOT NULL,
+    token TEXT UNIQUE NOT NULL
   )
 `);
+
+db.exec(`
+  create table if not exists blacklists(
+    id integer primary key autoincrement,
+    token text unique not null
+  )`)
 
 module.exports = db;

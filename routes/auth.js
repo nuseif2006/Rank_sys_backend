@@ -1,8 +1,21 @@
+require("dotenv").config()
 const express = require("express")
 const router = express.Router()
 const db = require("../db")
 const { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } = require("firebase/auth")
 const {auth} = require("../firebaseConfig")
+const { sign, verify, decode } = require("jsonwebtoken")
+
+// function verifyToken(req, res, next){
+//     const header = req.headers['authorization']
+//     const token = header && header.split(' ')[1]
+//     if (token == null) return res.status(400).json({msg: "Something went wrong"})
+//     verify(token, process.env.SECRET_KEY, (err, payload) => {
+//         if (err) return res.status(403).json({msg: "Something went wrong"})
+//         req.user = payload
+//         next()
+//     })
+// }
 
 router.post("/register", async (req, res) => {
     const {fname, lname, email, pass} = req.body
@@ -10,12 +23,14 @@ router.post("/register", async (req, res) => {
     try{
         const Data =await createUserWithEmailAndPassword(auth, email, pass)
         await sendEmailVerification(Data.user)
-        const insert =db.prepare("insert into users (fname, lname, email, pass) values(?,?,?,?)")
-        insert.run(fname, lname, email, pass)
-        res.status(201).json({msg: `Account created, check your inbox`})
+        const payload = {fname, lname, email}
+        const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "5s"})
+        const insert = db.prepare("insert into users (fname, lname, email, pass, token) values(?,?,?,?,?)")
+        insert.run(fname, lname, email, pass, refreshToken)
+        res.status(201).json({msg: `Account created, check your inbox`, refreshToken})
     }
-    catch(error){
-        console.log(error)
+    catch{
+        res.status(400).json({msg: "Error occured"})
     }
 })
 
@@ -25,13 +40,28 @@ router.post("/login", async (req, res)=> {
     try{
         const Data = await signInWithEmailAndPassword(auth, email, pass)
         await Data.user.reload()
-        if (!Data.user.emailVerified) return res.status(404).json({msg: "Account not found"})
-        // const select = db.prepare("select * from users where email = ? and pass = ?")
-        // const user = select.get(email, pass)
-        // if (!user) return res.status(404).json({msg: "Account not found"})
+        if (!Data.user.emailVerified) return res.status(404).json({msg: "Verify Account email link"})
+        const select = db.prepare("select * from users where email = ? and pass = ?")
+        const user = select.get(email, pass)
+        if (!user) return res.status(400).json({msg: "Something went wrong"})
+            const data = user.token
+            const fname = user.fname
+            const lname = user.lname
+        const decoded = decode(data)
+        const isExpired = Date.now() >= decoded.exp * 1000
+        const payload = {fname, lname, email}
+        if (isExpired){
+            const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "30d"})
+            const accessToken = sign(payload, refreshToken, {expiresIn: "1h"})
+            const update = db.prepare("update users set token =? where email = ?")
+            update.run(refreshToken, email)
+            return res.status(201).json({type: "new", refreshToken, accessToken})
+        }
+        const accessToken = sign(payload, data, {expiresIn: "1h"})
+        res.status(200).json({type: "old", refreshToken: data, accessToken})
     }
     catch{
-        res.json({msg: "Invalid Credentials"})
+        res.status(400).json({msg: "Invalid Credentials"})
     }
 })
 
