@@ -6,17 +6,6 @@ const { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVer
 const {auth} = require("../firebaseConfig")
 const { sign, verify, decode } = require("jsonwebtoken")
 
-// function verifyToken(req, res, next){
-//     const header = req.headers['authorization']
-//     const token = header && header.split(' ')[1]
-//     if (token == null) return res.status(400).json({msg: "Something went wrong"})
-//     verify(token, process.env.SECRET_KEY, (err, payload) => {
-//         if (err) return res.status(403).json({msg: "Something went wrong"})
-//         req.user = payload
-//         next()
-//     })
-// }
-
 router.post("/register", async (req, res) => {
     const {fname, lname, email, pass} = req.body
     if (fname == "" || lname == "" || email == "" || pass == "") return res.status(400).json({msg: "Error occured"})
@@ -24,7 +13,7 @@ router.post("/register", async (req, res) => {
         const Data =await createUserWithEmailAndPassword(auth, email, pass)
         await sendEmailVerification(Data.user)
         const payload = {fname, lname, email}
-        const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "5s"})
+        const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "30d"})
         const insert = db.prepare("insert into users (fname, lname, email, pass, token) values(?,?,?,?,?)")
         insert.run(fname, lname, email, pass, refreshToken)
         res.status(201).json({msg: `Account created, check your inbox`, refreshToken})

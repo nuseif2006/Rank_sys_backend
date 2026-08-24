@@ -14,4 +14,12 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  create table if not exists tasks(
+    id integer primary key autoincrement,
+    txt text not null,
+    completed text not null,
+    exp text not null
+  )`)
+
 module.exports = db;
