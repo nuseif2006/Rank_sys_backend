@@ -9,8 +9,8 @@ db.exec(`
     fname TEXT NOT NULL,
     lname TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    pass TEXT NOT NULL,
-    token TEXT UNIQUE NOT NULL
+    token TEXT UNIQUE NOT NULL,
+    score TEXT NOT NULL
   )
 `);
 
@@ -18,7 +18,6 @@ db.exec(`
   create table if not exists tasks(
     id integer primary key autoincrement,
     txt text not null,
-    completed text not null,
     exp text not null
   )`)
 

@@ -13,12 +13,14 @@ router.post("/register", async (req, res) => {
         const Data =await createUserWithEmailAndPassword(auth, email, pass)
         await sendEmailVerification(Data.user)
         const payload = {fname, lname, email}
+        const score = "0"
         const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "30d"})
-        const insert = db.prepare("insert into users (fname, lname, email, pass, token) values(?,?,?,?,?)")
-        insert.run(fname, lname, email, pass, refreshToken)
+        const insert = db.prepare("insert into users (fname, lname, email, token, score) values(?,?,?,?,?)")
+        insert.run(fname, lname, email, refreshToken, score)
         res.status(201).json({msg: `Account created, check your inbox`, refreshToken})
     }
-    catch{
+    catch(error){
+        if (error.code == "auth/email-already-in-use") return res.status(403).json({msg: "Email already in use"})
         res.status(400).json({msg: "Error occured"})
     }
 })
@@ -33,8 +35,8 @@ router.post("/login", async (req, res)=> {
             await sendEmailVerification(Data.user)
             return res.status(404).json({msg: "Verify Account email link"})
         }
-        const select = db.prepare("select * from users where email = ? and pass = ?")
-        const user = select.get(email, pass)
+        const select = db.prepare("select * from users where email = ?")
+        const user = select.get(email)
         if (!user) return res.status(400).json({msg: "Something went wrong"})
             const data = user.token
             const fname = user.fname
