@@ -3,16 +3,17 @@ const express = require("express")
 const router = express.Router()
 const db = require("../db")
 const { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } = require("firebase/auth")
-const {auth} = require("../firebaseConfig")
-const { sign, verify, decode } = require("jsonwebtoken")
+const {auth} = require("../firebaseConfig1")
+const { sign, decode } = require("jsonwebtoken")
 
 router.post("/register", async (req, res) => {
     const {fname, lname, email, pass} = req.body
     if (fname == "" || lname == "" || email == "" || pass == "") return res.status(400).json({msg: "Error occured"})
     try{
         const Data =await createUserWithEmailAndPassword(auth, email, pass)
+        const uid = Data.user.uid
         await sendEmailVerification(Data.user)
-        const payload = {fname, lname, email}
+        const payload = {fname, lname, email, uid}
         const score = "0"
         const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "30d"})
         const insert = db.prepare("insert into users (fname, lname, email, token, score) values(?,?,?,?,?)")

@@ -3,6 +3,7 @@ const cors = require("cors")
 const authRoutes = require("./routes/auth")
 const taskRoutes = require("./routes/task")
 const forgotRoutes = require("./routes/forgot")
+const delRoutes = require("./routes/del")
 
 const app = express()
 const port = 5000
@@ -16,6 +17,7 @@ app.use(cors({
 app.use("/auth", authRoutes)
 app.use("/tasks", taskRoutes)
 app.use("/forgot", forgotRoutes)
+app.use("/delete", delRoutes)
 
 app.get("/",(req, res) => {
     res.send("Healthy")
