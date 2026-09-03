@@ -55,8 +55,13 @@ router.post("/login", async (req, res)=> {
         const accessToken = sign(payload, data, {expiresIn: "1h"})
         res.status(200).json({type: "old", refreshToken: data, accessToken})
     }
-    catch{
-        res.status(400).json({msg: "Invalid Credentials"})
+    catch(error){
+        if (error.code == "auth/email-not-verified"){
+            return res.status(403).json({msg: `Verify Account email link sent to ${email}`})
+        }
+        else{
+            return res.status(400).json({msg: "Invalid Credentials"})
+        }
     }
 })
 
