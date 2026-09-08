@@ -4,6 +4,7 @@ const authRoutes = require("./routes/auth")
 const taskRoutes = require("./routes/task")
 const forgotRoutes = require("./routes/forgot")
 const delRoutes = require("./routes/del")
+const rankRoutes = require("./routes/rank")
 const http = require("http")
 const {Server} = require("socket.io")
 
@@ -28,15 +29,7 @@ app.use("/auth", authRoutes)
 app.use("/tasks", taskRoutes)
 app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
-
-io.on("connection", (socket) => {
-    socket.emit("nuseif", "Hello from nodejs")
-
-    socket.on("disconnect", () => {
-        console.log(`Socket disconnected: ${socket.id}`)
-    })
-
-})
+app.use("/rank", rankRoutes)
 
 app.get("/",(req, res) => {
     res.send("Healthy")
