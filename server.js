@@ -4,14 +4,24 @@ const authRoutes = require("./routes/auth")
 const taskRoutes = require("./routes/task")
 const forgotRoutes = require("./routes/forgot")
 const delRoutes = require("./routes/del")
+const http = require("http")
+const {Server} = require("socket.io")
 
 const app = express()
 const port = 5000
+const server = http.createServer(app)
+const allowedOrigins = ["http://192.168.56.1:3000", "http://localhost:3000"]
+const io = new Server(server,{
+    cors:{
+        origin: allowedOrigins,
+        methods: ["GET", "POST"]
+    }
+})
 
 app.use(express.json())
 
 app.use(cors({
-    origin: ["http://192.168.56.1:3000", "http://localhost:3000"]
+    origin: allowedOrigins
 }))
 
 app.use("/auth", authRoutes)
@@ -19,9 +29,18 @@ app.use("/tasks", taskRoutes)
 app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
 
+io.on("connection", (socket) => {
+    socket.emit("nuseif", "Hello from nodejs")
+
+    socket.on("disconnect", () => {
+        console.log(`Socket disconnected: ${socket.id}`)
+    })
+
+})
+
 app.get("/",(req, res) => {
     res.send("Healthy")
 })
 
 
-app.listen(port,()=> console.log(`App running on http://localhost:${port}`))
+server.listen(port,()=> console.log(`Server running on http://localhost:${port}`))
