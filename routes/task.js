@@ -21,4 +21,15 @@ router.get("/",verifyToken ,(req, res)=> {
     res.status(200).json({user, data})
 })
 
+router.put("/update", verifyToken, (req, res) => {
+    const {score} = req.body
+    const email = req.user.email
+    const getScore = db.prepare("select score from users where email=?")
+    const data = getScore.get(email)
+    const totalScore= Number(data.score) + Number(score)
+    const update = db.prepare("update users set score=? where email=? ")
+    update.run(totalScore.toString(), email)
+    res.send("updated successfuly")
+})
+
 module.exports = router

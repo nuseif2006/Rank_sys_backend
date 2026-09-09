@@ -7,6 +7,7 @@ const delRoutes = require("./routes/del")
 const rankRoutes = require("./routes/rank")
 const http = require("http")
 const {Server} = require("socket.io")
+const db=require("./db")
 
 const app = express()
 const port = 5000
@@ -30,6 +31,12 @@ app.use("/tasks", taskRoutes)
 app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
 app.use("/rank", rankRoutes)
+
+io.on("connection", (socket) => {
+    const getUsers = db.prepare("select * from users")
+    const data =getUsers.all()
+    socket.emit("users", data)
+})
 
 app.get("/",(req, res) => {
     res.send("Healthy")

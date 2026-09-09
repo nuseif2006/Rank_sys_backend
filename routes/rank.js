@@ -15,10 +15,8 @@ function verifyToken(req, res, next){
 }
 
 router.get("/", verifyToken, (req, res) => {
-    const users = db.prepare("select * from users")
-    const data= users.all()
     const user = req.user
-    res.status(200).json({user, data})
+    res.status(200).json({user})
 })
 
 module.exports = router
