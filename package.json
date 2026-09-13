@@ -15,9 +15,17 @@
     "express": "^5.2.1",
     "firebase": "^12.18.0",
     "firebase-admin": "^14.3.0",
+    "jose": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
     "jwks-rsa": "^4.1.0",
-    "nodemon": "^3.1.14",
     "socket.io": "^4.8.3"
+  },
+  "overrides": {
+    "jwks-rsa": {
+      "jose": "5.10.0"
+    }
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
