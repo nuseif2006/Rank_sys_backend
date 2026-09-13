@@ -1,8 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const { verify } = require("jsonwebtoken")
-const {adminAuth} = require("../firebaseConfig")
-const db = require("../db")
+const {adminAuth, db} = require("../firebaseConfig")
 
 function verifyToken(req, res, next){
     const header = req.headers['authorization']
@@ -21,10 +20,17 @@ router.delete("/user", verifyToken, async (req, res)=>{
     if (!uid){
         return res.status(403).json({msg: "token missing"})
     }
-    await adminAuth.deleteUser(uid)
-    const remove=db.prepare("delete from users where email=?")
-    remove.run(email)
-    res.status(200).json({msg: "Account Deleted Successfuly"})
+    try{
+        await adminAuth.deleteUser(uid)
+        const getRemove =await db.collection("users").where("email", "==", email).get()
+        if (getRemove.empty) return res.status(403).json({msg: "Account not found"})
+        const remove = getRemove.docs[0].ref
+        await remove.delete()
+        res.status(200).json({msg: "Account Deleted Successfuly"})
+    }
+    catch{
+        res.json({msg: "Error occured"})
+    }
 })
 
 module.exports = router

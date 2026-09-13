@@ -7,7 +7,7 @@ const delRoutes = require("./routes/del")
 const rankRoutes = require("./routes/rank")
 const http = require("http")
 const {Server} = require("socket.io")
-const db=require("./db")
+const {db}=require("./firebaseConfig")
 
 const app = express()
 const port = 5000
@@ -32,9 +32,13 @@ app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
 app.use("/rank", rankRoutes)
 
-io.on("connection", (socket) => {
-    const getUsers = db.prepare("select * from users")
-    const data =getUsers.all()
+io.on("connection", async (socket) => {
+    const getUsers = await db.collection("users").get()
+    if (getUsers.empty) return socket.emit("users", "Error occured")
+    const data = getUsers.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
     socket.emit("users", data)
 })
 

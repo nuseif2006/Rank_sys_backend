@@ -1,7 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const router = express.Router()
-const db = require("../db")
+const {db} = require("../firebaseConfig")
 const { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } = require("firebase/auth")
 const {auth} = require("../firebaseConfig1")
 const { sign, decode } = require("jsonwebtoken")
@@ -16,8 +16,13 @@ router.post("/register", async (req, res) => {
         const payload = {fname, lname, email, uid}
         const score = "0"
         const refreshToken = sign(payload, process.env.SECRET_KEY, {expiresIn: "30d"})
-        const insert = db.prepare("insert into users (fname, lname, email, token, score) values(?,?,?,?,?)")
-        insert.run(fname, lname, email, refreshToken, score)
+        await db.collection("users").add({
+            fname,
+            lname,
+            email,
+            token: refreshToken,
+            score
+        })
         res.status(201).json({msg: `Account created, check your inbox`, refreshToken})
     }
     catch(error){
@@ -36,8 +41,8 @@ router.post("/login", async (req, res)=> {
             await sendEmailVerification(Data.user)
             return res.status(404).json({msg: "Verify Account email link"})
         }
-        const select = db.prepare("select * from users where email = ?")
-        const user = select.get(email)
+        const select = await db.collection("users").where("email", "==", email).get()
+        const user = select.docs[0].data()
         if (!user) return res.status(400).json({msg: "Something went wrong"})
             const data = user.token
             const fname = user.fname

@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const db = require("../db")
+const {db} = require("../firebaseConfig")
 const { verify } = require("jsonwebtoken")
 
 function verifyToken(req, res, next){
@@ -14,22 +14,38 @@ function verifyToken(req, res, next){
     })
 }
 
-router.get("/",verifyToken ,(req, res)=> {
-    const tasks = db.prepare("select * from tasks")
-    const data= tasks.all()
-    const user =req.user
-    res.status(200).json({user, data})
+router.get("/",verifyToken , async (req, res)=> {
+    try{
+        const tasks = await db.collection("tasks").get()
+        if (tasks.empty) return res.status(403).json({msg: "Error occured"})
+        const data = tasks.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        const user =req.user
+        res.status(200).json({user, data})
+    }
+    catch{
+        res.json({msg: "Error occured"})
+    }
 })
 
-router.put("/update", verifyToken, (req, res) => {
+router.put("/update", verifyToken, async (req, res) => {
     const {score} = req.body
     const email = req.user.email
-    const getScore = db.prepare("select score from users where email=?")
-    const data = getScore.get(email)
-    const totalScore= Number(data.score) + Number(score)
-    const update = db.prepare("update users set score=? where email=? ")
-    update.run(totalScore.toString(), email)
-    res.send("updated successfuly")
+    try{
+        const getScore = await db.collection("users").where("email", "==", email).get()
+        const data = getScore.docs[0].data()
+        const updateData = getScore.docs[0].ref
+        const totalScore= Number(data.score) + Number(score)
+        await updateData.update({
+            score: totalScore.toString()
+        })
+        res.send("updated Successfuly")
+    }
+    catch{
+        res.json({msg: "Error occured"})
+    }
 })
 
 module.exports = router
