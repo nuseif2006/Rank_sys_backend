@@ -12,7 +12,7 @@ const {db}=require("./firebaseConfig")
 const app = express()
 const port = 5000
 const server = http.createServer(app)
-const allowedOrigins = ["http://192.168.56.1:3000", "http://localhost:3000"]
+const allowedOrigins = ["https://rank-sys-frontend.vercel.app"]
 const io = new Server(server,{
     cors:{
         origin: allowedOrigins,
