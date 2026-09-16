@@ -29,12 +29,12 @@ app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
 app.use("/rank", rankRoutes)
 
+const getUsers = await db.collection("users").get()
+const data = getUsers.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+}));
 io.on("connection", async (socket) => {
-    const getUsers = await db.collection("users").get()
-    const data = getUsers.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
     io.emit("users", data)
 })
 
