@@ -35,7 +35,7 @@ io.on("connection", async (socket) => {
         id: doc.id,
         ...doc.data()
     }));
-    socket.emit("users", data)
+    io.emit("users", data)
 })
 
 app.get("/", (req, res) => {
