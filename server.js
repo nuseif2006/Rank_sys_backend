@@ -23,6 +23,11 @@ const io = new Server(server, {
 app.use(express.json())
 app.use(cors({ origin: allowedOrigins }))
 
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 app.use("/auth", authRoutes)
 app.use("/tasks", taskRoutes)
 app.use("/forgot", forgotRoutes)
