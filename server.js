@@ -29,13 +29,16 @@ app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
 app.use("/rank", rankRoutes)
 
-db.collection("users").onSnapshot((snapshot) => {
-  const data = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
+io.on("connection",async (socket) => {
+  const getUsers =await db.collection("users").get()
+  const data = getUsers.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
   }))
-  io.on("connection", async () => {
-      io.emit("users", data)
+  socket.emit("users", data)
+  socket.on("updateScore", () => {
+    socket.emit("users", data)
+    socket.broadcast.emit("users", data)
   })
 })
 
