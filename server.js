@@ -37,9 +37,14 @@ io.on("connection",async (socket) => {
     ...doc.data()
   }))
   socket.emit("users", data)
-  socket.on("updateScore", () => {
-      socket.emit("users1", data)
-      socket.broadcast.emit("users1", data)
+  socket.on("updateScore", async () => {
+      const getUsers =await db.collection("users").get()
+      const data = getUsers.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+      socket.emit("users", data)
+      socket.broadcast.emit("users", data)
   })
 })
 
