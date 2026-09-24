@@ -29,19 +29,17 @@ app.use("/forgot", forgotRoutes)
 app.use("/delete", delRoutes)
 app.use("/rank", rankRoutes)
 
-async function fetchScore(target = io){
+
+io.on("connection",async (socket) => {
   const getUsers =await db.collection("users").get()
   const data = getUsers.docs.map(doc => ({
     id: doc.id,
     ...doc.data()
   }))
-  target.emit("users", data)
-}
-
-io.on("connection",async (socket) => {
-  await fetchScore(socket)
-  socket.on("updateScore", async () => {
-    await fetchScore(io)
+  socket.emit("users", data)
+  socket.on("updateScore", () => {
+      socket.emit("users", data)
+      socket.broadcast.emit("users", data)
   })
 })
 
