@@ -38,8 +38,8 @@ io.on("connection",async (socket) => {
   }))
   socket.emit("users", data)
   socket.on("updateScore", () => {
-      socket.emit("users", data)
-      socket.broadcast.emit("users", data)
+      socket.emit("users1", data)
+      socket.broadcast.emit("users1", data)
   })
 })
 
