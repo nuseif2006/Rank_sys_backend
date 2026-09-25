@@ -36,7 +36,8 @@ io.on("connection",async (socket) => {
         id: doc.id,
         ...doc.data()
       }))
-      io.emit("users", data)
+      socket.emit("users", data)
+      socket.broadcast.emit("users", data)
   })
 })
 
