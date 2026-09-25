@@ -39,11 +39,11 @@ io.on("connection",async (socket) => {
   socket.emit("users", data)
   socket.on("updateScore", async () => {
       const getUsers =await db.collection("users").get()
-      const data = getUsers.docs.map(doc => ({
+      const data1 = getUsers.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }))
-      io.emit("users", data)
+      io.emit("users", data1)
   })
 })
 
