@@ -41,6 +41,12 @@ router.put("/update", verifyToken, async (req, res) => {
         await updateData.update({
             score: totalScore.toString()
         })
+        const getUsers = await db.collection("users").get()
+        const data1 = getUsers.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }))
+        req.app.get("io").emit("users", data1)
         res.send("updated Successfuly")
     }
     catch{
