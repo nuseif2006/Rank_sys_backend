@@ -46,8 +46,7 @@ router.put("/update", verifyToken, async (req, res) => {
             id: doc.id,
             ...doc.data()
         }))
-        req.app.get("io").emit("users", data1)
-        res.send("updated Successfuly")
+        res.json({data: data1})
     }
     catch{
         res.json({msg: "Error occured"})
